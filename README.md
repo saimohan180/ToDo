@@ -31,6 +31,12 @@ A modern, local-first task management application.
    ```
    Access the production server at: [http://localhost:4010](http://localhost:4010)
 
+## 🔐 Secret Journal
+
+The Secret Journal feature is protected by a password to keep your entries private.
+- **Default Password:** `admin`
+- **Tip:** You can change this password at any time in the **Settings** tab.
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
