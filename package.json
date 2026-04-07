@@ -1,0 +1,37 @@
+{
+  "name": "taskflow",
+  "version": "0.4.0",
+  "description": "TaskFlow - Modern local-first task manager with encrypted journaling",
+  "main": "server/index.js",
+  "bin": {
+    "taskflow": "bin/taskflow"
+  },
+  "scripts": {
+    "start": "node bin/taskflow",
+    "server": "node server/index.js",
+    "dev:web": "vite",
+    "build:web": "vite build",
+    "dev": "concurrently \"npm run server\" \"npm run dev:web\"",
+    "build": "npm run build:web && npm start"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^11.9.1",
+    "crypto-js": "^4.2.0",
+    "express": "^4.21.2",
+    "lucide-react": "^1.7.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "concurrently": "^9.1.2",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "vite": "^6.0.0"
+  }
+}

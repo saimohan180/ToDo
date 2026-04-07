@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+const { startServer } = require("../server");
+
+async function run() {
+  const port = Number.parseInt(process.env.PORT ?? "4010", 10);
+
+  if (Number.isNaN(port) || port <= 0) {
+    console.error("Invalid PORT value. Please provide a positive integer.");
+    process.exit(1);
+  }
+
+  try {
+    const { server, url } = await startServer({ port });
+
+    console.log("🚀 TaskFlow started successfully!\n");
+    console.log("📍 Access your dashboard:");
+    console.log(url);
+    console.log("\nPress Ctrl+C to stop");
+
+    process.on("SIGINT", () => {
+      server.close(() => process.exit(0));
+    });
+  } catch (error) {
+    console.error(`Failed to start TaskFlow: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+run();
+
