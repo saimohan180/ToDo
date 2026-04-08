@@ -8,6 +8,8 @@ const focusRouter = require("./routes/focus");
 const journalRouter = require("./routes/journal");
 const settingsRouter = require("./routes/settings");
 const boardsRouter = require("./routes/boards");
+const habitsRouter = require("./routes/habits");
+const authRouter = require("./routes/auth");
 const settingsService = require("./services/settingsService");
 
 function createApp() {
@@ -17,6 +19,7 @@ function createApp() {
   
   settingsService.initializeSettings();
 
+  app.use("/api/auth", authRouter);
   app.use("/api/tasks", tasksRouter);
   app.use("/api/analytics", analyticsRouter);
   app.use("/api/projects", projectsRouter);
@@ -24,6 +27,7 @@ function createApp() {
   app.use("/api/journal", journalRouter);
   app.use("/api/settings", settingsRouter);
   app.use("/api/boards", boardsRouter);
+  app.use("/api/habits", habitsRouter);
 
   const distPath = path.join(__dirname, "..", "web", "dist");
   
@@ -35,7 +39,7 @@ function createApp() {
     });
   } else {
     app.get("/", (_req, res) => {
-      res.type("text/plain").send("TaskFlow API is running. Run 'npm run build:web' to build the frontend.");
+      res.type("text/plain").send("HexOra API is running. Run 'npm run build:web' to build the frontend.");
     });
   }
 
@@ -75,10 +79,10 @@ function startServer({ port = 4010, host = "127.0.0.1" } = {}) {
 if (require.main === module) {
   startServer()
     .then(({ url }) => {
-      console.log(`TaskFlow API listening at ${url}`);
+      console.log(`HexOra API listening at ${url}`);
     })
     .catch((error) => {
-      console.error(`Failed to start TaskFlow API: ${error.message}`);
+      console.error(`Failed to start HexOra API: ${error.message}`);
       process.exit(1);
     });
 }
@@ -87,4 +91,3 @@ module.exports = {
   createApp,
   startServer,
 };
-

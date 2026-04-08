@@ -1,6 +1,56 @@
 const API_BASE = '/api';
 
 export const api = {
+  auth: {
+    login: async (username, password) => {
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Login failed');
+      return data;
+    },
+
+    verify: async (username) => {
+      const response = await fetch(`${API_BASE}/auth/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      });
+      return response.json();
+    },
+
+    updateUsername: async (currentUsername, newUsername, password) => {
+      const response = await fetch(`${API_BASE}/auth/username`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentUsername, newUsername, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to update username');
+      return data;
+    },
+
+    updatePassword: async (username, currentPassword, newPassword) => {
+      const response = await fetch(`${API_BASE}/auth/password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, currentPassword, newPassword }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to update password');
+      return data;
+    },
+
+    getMe: async () => {
+      const response = await fetch(`${API_BASE}/auth/me`);
+      if (!response.ok) throw new Error('Failed to get user info');
+      return response.json();
+    },
+  },
+
   tasks: {
     list: async (date) => {
       const url = date !== undefined 
@@ -338,6 +388,73 @@ export const api = {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete connection');
+    },
+  },
+
+  habits: {
+    list: async () => {
+      const response = await fetch(`${API_BASE}/habits`);
+      if (!response.ok) throw new Error('Failed to fetch habits');
+      const data = await response.json();
+      return data.habits;
+    },
+
+    get: async (id) => {
+      const response = await fetch(`${API_BASE}/habits/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch habit');
+      return response.json();
+    },
+
+    create: async (habit) => {
+      const response = await fetch(`${API_BASE}/habits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(habit),
+      });
+      if (!response.ok) throw new Error('Failed to create habit');
+      return response.json();
+    },
+
+    update: async (id, updates) => {
+      const response = await fetch(`${API_BASE}/habits/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) throw new Error('Failed to update habit');
+      return response.json();
+    },
+
+    delete: async (id) => {
+      const response = await fetch(`${API_BASE}/habits/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete habit');
+    },
+
+    toggleComplete: async (id, date) => {
+      const response = await fetch(`${API_BASE}/habits/${id}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date }),
+      });
+      if (!response.ok) throw new Error('Failed to toggle completion');
+      return response.json();
+    },
+
+    getTodayStatus: async () => {
+      const response = await fetch(`${API_BASE}/habits/today/status`);
+      if (!response.ok) throw new Error('Failed to fetch today status');
+      return response.json();
+    },
+
+    getCompletions: async (id, startDate, endDate) => {
+      const params = new URLSearchParams();
+      if (startDate) params.append('start_date', startDate);
+      if (endDate) params.append('end_date', endDate);
+      const response = await fetch(`${API_BASE}/habits/${id}/completions?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch completions');
+      return response.json();
     },
   },
 };

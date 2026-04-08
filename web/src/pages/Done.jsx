@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../store/useStore';
 import TaskItem from '../components/TaskItem';
-import { formatDate, getTodayDate } from '../lib/utils';
+import { formatDate, getTodayDate, getLocalDateString } from '../lib/utils';
 import { getWeekStartEnd, getMonthStartEnd } from '../lib/dateHelpers';
 import { CheckCircle2, Trophy, Calendar, CalendarDays, CalendarRange, ChevronLeft, ChevronRight, LayoutList, LayoutGrid } from 'lucide-react';
 
@@ -103,7 +103,7 @@ export default function Done() {
         day: i,
         date: dateStr,
         count: dayTasks.length,
-        isToday: dateStr === new Date().toISOString().split('T')[0],
+        isToday: dateStr === getLocalDateString(),
         isSelected: dateStr === selectedDate
       });
     }

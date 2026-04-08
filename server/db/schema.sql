@@ -47,6 +47,15 @@ CREATE TABLE IF NOT EXISTS settings (
   updated_at TEXT NOT NULL
 );
 
+-- Users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS boards (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -91,4 +100,31 @@ CREATE TABLE IF NOT EXISTS board_connections (
 );
 
 CREATE INDEX IF NOT EXISTS idx_board_connections_board ON board_connections(board_id);
+
+CREATE TABLE IF NOT EXISTS habits (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  frequency TEXT NOT NULL CHECK (frequency IN ('daily', 'weekly', 'monthly')),
+  frequency_data TEXT,
+  duration_type TEXT NOT NULL DEFAULT 'lifetime' CHECK (duration_type IN ('lifetime', 'limited')),
+  duration_days INTEGER,
+  is_private INTEGER NOT NULL DEFAULT 0,
+  color TEXT NOT NULL DEFAULT '#00ff9c',
+  icon TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS habit_completions (
+  id TEXT PRIMARY KEY,
+  habit_id TEXT NOT NULL,
+  date TEXT NOT NULL,
+  completed_at TEXT NOT NULL,
+  FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE,
+  UNIQUE(habit_id, date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_habit_completions_habit ON habit_completions(habit_id);
+CREATE INDEX IF NOT EXISTS idx_habit_completions_date ON habit_completions(date);
 

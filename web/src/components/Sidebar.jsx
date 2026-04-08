@@ -9,10 +9,11 @@ import {
   CheckCircle2,
   BookLock,
   Settings,
-  Sparkles,
+  Hexagon,
   Layout,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Zap
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -24,6 +25,7 @@ export default function Sidebar() {
     { id: 'inbox', label: 'Just Todo', icon: Inbox },
     { id: 'projects', label: 'Projects', icon: FolderKanban },
     { id: 'boards', label: 'Boards', icon: Layout },
+    { id: 'habits', label: 'Habits', icon: Zap },
     { id: 'focus', label: 'Focus', icon: Timer },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
     { id: 'done', label: 'Done', icon: CheckCircle2 },
@@ -50,12 +52,12 @@ export default function Sidebar() {
       <div className={`p-6 border-b border-[#21262d] ${sidebarCollapsed ? 'px-4' : ''}`}>
         <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-emerald-400 flex items-center justify-center shadow-lg shadow-accent/20 flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-[#0b0f14]" />
+            <Hexagon className="w-5 h-5 text-[#0b0f14]" strokeWidth={2} />
           </div>
           {!sidebarCollapsed && (
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">TaskFlow</h1>
-              <p className="text-xs text-gray-500">Local Task Manager</p>
+              <h1 className="text-xl font-bold text-white tracking-tight">Hex<span className="text-accent">Ora</span></h1>
+              <p className="text-xs text-gray-500">Your Productivity Hub</p>
             </div>
           )}
         </div>

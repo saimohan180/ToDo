@@ -1,3 +1,5 @@
+import { getLocalDateString } from './utils';
+
 export function getMonthDays(year, month) {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -11,13 +13,18 @@ export function getMonthDays(year, month) {
     days.push(null);
   }
   
-  // Add all days of the month
+  // Add all days of the month - use local time to avoid timezone issues
   for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day);
+    const yearStr = year.toString();
+    const monthStr = String(month + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateStr = `${yearStr}-${monthStr}-${dayStr}`;
+    const todayStr = getLocalDateString();
+    
     days.push({
       day,
-      date: date.toISOString().split('T')[0],
-      isToday: date.toDateString() === new Date().toDateString(),
+      date: dateStr,
+      isToday: dateStr === todayStr,
     });
   }
   
@@ -40,7 +47,7 @@ export function getDateRange(numDays = 7) {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     dates.push({
-      date: date.toISOString().split('T')[0],
+      date: getLocalDateString(date),
       dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
       day: date.getDate(),
       month: date.getMonth(),
@@ -62,8 +69,8 @@ export function getWeekStartEnd() {
   end.setDate(now.getDate() + (6 - dayOfWeek));
   
   return {
-    start: start.toISOString().split('T')[0],
-    end: end.toISOString().split('T')[0],
+    start: getLocalDateString(start),
+    end: getLocalDateString(end),
   };
 }
 
@@ -73,8 +80,8 @@ export function getMonthStartEnd() {
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   
   return {
-    start: start.toISOString().split('T')[0],
-    end: end.toISOString().split('T')[0],
+    start: getLocalDateString(start),
+    end: getLocalDateString(end),
   };
 }
 

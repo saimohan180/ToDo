@@ -4,16 +4,13 @@ import TaskInput from '../components/TaskInput';
 import TaskItem from '../components/TaskItem';
 import EfficiencyBar from '../components/EfficiencyBar';
 import DateScroller from '../components/DateScroller';
-import { formatDate } from '../lib/utils';
+import { formatDate, getLocalDateString } from '../lib/utils';
 import { api } from '../lib/api';
 import { CalendarDays, Sparkles, ListTodo } from 'lucide-react';
 
 export default function Today() {
   const { tasks, analytics, addTask, toggleTask, deleteTask, isLoading } = useStore();
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const now = new Date();
-    return now.toISOString().split('T')[0];
-  });
+  const [selectedDate, setSelectedDate] = useState(() => getLocalDateString());
   const [dateTasks, setDateTasks] = useState([]);
   const [dateAnalytics, setDateAnalytics] = useState({ total: 0, completed: 0, efficiency: 0 });
   const [loading, setLoading] = useState(false);
@@ -93,7 +90,7 @@ export default function Today() {
     );
   }
 
-  const isToday = selectedDate === new Date().toISOString().split('T')[0];
+  const isToday = selectedDate === getLocalDateString();
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-[#0b0f14] via-[#0d1117] to-[#161b22]">

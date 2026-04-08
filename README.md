@@ -34,8 +34,14 @@ A modern, local-first task management application.
 ## 🔐 Secret Journal
 
 The Secret Journal feature is protected by a password to keep your entries private.
-- **Default Password:** `admin`
+- **Journal Password (default):** `admin`
 - **Tip:** You can change this password at any time in the **Settings** tab.
+
+## 🔑 Default Credentials
+
+- **Username:** `admin`
+- **Password:** `admin`
+- **Journal Password:** `admin`
 
 ## 📝 License
 

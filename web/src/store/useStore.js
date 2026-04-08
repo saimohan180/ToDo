@@ -30,6 +30,11 @@ export const useStore = create((set, get) => ({
   isLoading: false,
   error: null,
   sidebarCollapsed: false,
+  user: null,
+
+  setUser: (user) => {
+    set({ user });
+  },
 
   toggleSidebar: () => {
     set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed }));

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../lib/api';
-import { Timer, Bell, Plus, Trash2, Play, Pause, RotateCcw, BarChart3, Clock, Target } from 'lucide-react';
+import { Timer, Bell, Plus, Trash2, Play, Pause, RotateCcw, BarChart3, Clock, Target, Edit3 } from 'lucide-react';
 
 export default function Focus() {
   const [duration, setDuration] = useState(25);
@@ -11,14 +11,24 @@ export default function Focus() {
   const [stats, setStats] = useState({ today: { sessions: 0, minutes: 0 }, allTime: { sessions: 0, minutes: 0 } });
   const [alarmTime, setAlarmTime] = useState('');
   const [alarms, setAlarms] = useState([]);
+  const [isEditingDuration, setIsEditingDuration] = useState(false);
+  const [customDuration, setCustomDuration] = useState('');
   const intervalRef = useRef(null);
   const audioRef = useRef(null);
+  const durationInputRef = useRef(null);
 
   useEffect(() => {
     loadSessions();
     loadStats();
     audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIF2S56+yQSg0PUqzk+LRkHAU2j9frxngoAy5+zPLaizsKGGS56+qXTQ0NTqvh8bllHAU2kNXyvnUlBSl+zPDajDwKGGS56+mYTQ0NTavf8b1kHAU2j9brvnUlBSl+zPDaizsKGGS56+qWTA0NTqzh8blkHAU2kNfrvnUlBSh+zPDaizsKGGS56+qWTA0NT6zh8bllHAU2j9brvnUlBSh+zPDaizsKGGS56+qWTA0NT6zh8bllHAU2j9brvnUlBSh+zPDaizsKGGS56+qWTA0NT6zh8bllHAU2j9brvnUlBSh+zPDaizsKGGS56+qWTA0NT6zh8bllHAU2j9brvnUlBSh+zPDaizsKGGS56+qWTA0');
   }, []);
+
+  useEffect(() => {
+    if (isEditingDuration && durationInputRef.current) {
+      durationInputRef.current.focus();
+      durationInputRef.current.select();
+    }
+  }, [isEditingDuration]);
 
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
@@ -122,6 +132,39 @@ export default function Focus() {
     setAlarms(alarms.filter(a => a.id !== id));
   };
 
+  const handleCustomDurationClick = () => {
+    if (!isRunning) {
+      setCustomDuration(duration.toString());
+      setIsEditingDuration(true);
+    }
+  };
+
+  const handleCustomDurationChange = (e) => {
+    const value = e.target.value;
+    if (value === '' || /^\d+$/.test(value)) {
+      setCustomDuration(value);
+    }
+  };
+
+  const handleCustomDurationSubmit = () => {
+    const parsed = parseInt(customDuration);
+    if (!isNaN(parsed) && parsed > 0 && parsed <= 999) {
+      setDuration(parsed);
+      setTimeLeft(parsed * 60);
+    }
+    setIsEditingDuration(false);
+    setCustomDuration('');
+  };
+
+  const handleCustomDurationKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleCustomDurationSubmit();
+    } else if (e.key === 'Escape') {
+      setIsEditingDuration(false);
+      setCustomDuration('');
+    }
+  };
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -207,7 +250,7 @@ export default function Focus() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm text-gray-400 mb-2 block">Duration</label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-3">
                   {presets.map(preset => (
                     <button
                       key={preset}
@@ -225,6 +268,41 @@ export default function Focus() {
                       {preset}m
                     </button>
                   ))}
+                </div>
+                
+                {/* Custom Duration Input */}
+                <div className="mt-2">
+                  {isEditingDuration ? (
+                    <div className="flex gap-2">
+                      <div className="flex-1 relative">
+                        <input
+                          ref={durationInputRef}
+                          type="text"
+                          value={customDuration}
+                          onChange={handleCustomDurationChange}
+                          onKeyDown={handleCustomDurationKeyDown}
+                          onBlur={handleCustomDurationSubmit}
+                          placeholder="Enter minutes..."
+                          className="w-full px-4 py-2.5 bg-[#21262d] text-white rounded-xl border border-[#30363d] focus:border-accent focus:outline-none"
+                        />
+                      </div>
+                      <button
+                        onClick={handleCustomDurationSubmit}
+                        className="px-4 py-2.5 bg-accent text-[#0b0f14] rounded-xl font-semibold hover:shadow-lg hover:shadow-accent/25 transition-all"
+                      >
+                        Set
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleCustomDurationClick}
+                      disabled={isRunning}
+                      className="w-full py-2.5 bg-[#21262d] text-gray-300 rounded-xl hover:bg-[#30363d] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                      Custom ({duration}m)
+                    </button>
+                  )}
                 </div>
               </div>
 

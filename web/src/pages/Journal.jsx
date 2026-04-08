@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { getLocalDateString } from '../lib/utils';
 import { 
   Lock, 
   Unlock, 
@@ -138,7 +139,7 @@ export default function Journal() {
         day: i,
         date: dateStr,
         hasEntry: entryDates.includes(dateStr),
-        isToday: dateStr === new Date().toISOString().split('T')[0],
+        isToday: dateStr === getLocalDateString(),
         isSelected: dateStr === selectedDate
       });
     }
@@ -203,7 +204,7 @@ export default function Journal() {
             </form>
 
             <p className="text-center text-gray-500 text-xs mt-6">
-              Default password: <span className="text-gray-400 font-mono">admin</span>
+              Use your journal password to unlock.
             </p>
           </div>
         </div>

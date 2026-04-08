@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getLocalDateString } from '../lib/utils';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -7,7 +8,7 @@ const MONTHS = [
 ];
 
 function getWeekDates(baseDate) {
-  const date = new Date(baseDate);
+  const date = new Date(baseDate + 'T00:00:00');
   const day = date.getDay();
   const diff = date.getDate() - day;
   
@@ -15,8 +16,8 @@ function getWeekDates(baseDate) {
   for (let i = 0; i < 7; i++) {
     const d = new Date(date);
     d.setDate(diff + i);
-    const dateStr = d.toISOString().split('T')[0];
-    const today = new Date().toISOString().split('T')[0];
+    const dateStr = getLocalDateString(d);
+    const today = getLocalDateString(new Date());
     
     weekDates.push({
       date: dateStr,
@@ -45,24 +46,24 @@ function getWeekLabel(dates) {
 }
 
 export default function DateScroller({ onDateSelect, currentDate }) {
-  const [baseDate, setBaseDate] = useState(() => currentDate || new Date().toISOString().split('T')[0]);
+  const [baseDate, setBaseDate] = useState(() => currentDate || getLocalDateString());
   
   const dates = useMemo(() => getWeekDates(baseDate), [baseDate]);
   const weekLabel = useMemo(() => getWeekLabel(dates), [dates]);
   
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   const isCurrentWeek = dates.some(d => d.isToday);
 
   const navigateWeek = (direction) => {
-    const current = new Date(baseDate);
+    const current = new Date(baseDate + 'T00:00:00');
     current.setDate(current.getDate() + (direction * 7));
-    const newDate = current.toISOString().split('T')[0];
+    const newDate = getLocalDateString(current);
     setBaseDate(newDate);
     onDateSelect(newDate);
   };
 
   const goToToday = () => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalDateString();
     setBaseDate(todayStr);
     onDateSelect(todayStr);
   };
