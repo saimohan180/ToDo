@@ -128,3 +128,14 @@ CREATE TABLE IF NOT EXISTS habit_completions (
 CREATE INDEX IF NOT EXISTS idx_habit_completions_habit ON habit_completions(habit_id);
 CREATE INDEX IF NOT EXISTS idx_habit_completions_date ON habit_completions(date);
 
+CREATE TABLE IF NOT EXISTS habit_counters (
+  id TEXT PRIMARY KEY,
+  habit_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  count INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (habit_id) REFERENCES habits(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_habit_counters_habit ON habit_counters(habit_id);

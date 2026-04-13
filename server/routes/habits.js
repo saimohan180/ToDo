@@ -188,6 +188,86 @@ router.get("/:id", (req, res) => {
   });
 });
 
+// Get tap counters for a habit
+router.get("/:id/counters", (req, res) => {
+  const habit = db.prepare("SELECT id FROM habits WHERE id = ?").get(req.params.id);
+  if (!habit) {
+    return res.status(404).json({ error: "Habit not found" });
+  }
+
+  const counters = db
+    .prepare(
+      `SELECT id, habit_id, name, count, created_at, updated_at
+       FROM habit_counters
+       WHERE habit_id = ?
+       ORDER BY created_at DESC`
+    )
+    .all(req.params.id);
+
+  res.json({ counters });
+});
+
+// Create a tap counter inside a habit
+router.post("/:id/counters", (req, res) => {
+  const { name } = req.body;
+  if (!name?.trim()) {
+    return res.status(400).json({ error: "Counter name is required" });
+  }
+
+  const habit = db.prepare("SELECT id FROM habits WHERE id = ?").get(req.params.id);
+  if (!habit) {
+    return res.status(404).json({ error: "Habit not found" });
+  }
+
+  const id = generateId();
+  const timestamp = now();
+  db.prepare(
+    `INSERT INTO habit_counters (id, habit_id, name, count, created_at, updated_at)
+     VALUES (?, ?, ?, 0, ?, ?)`
+  ).run(id, req.params.id, name.trim(), timestamp, timestamp);
+
+  const counter = db
+    .prepare("SELECT id, habit_id, name, count, created_at, updated_at FROM habit_counters WHERE id = ?")
+    .get(id);
+
+  res.status(201).json({ counter });
+});
+
+// Increment a tap counter
+router.post("/:id/counters/:counterId/increment", (req, res) => {
+  const timestamp = now();
+  const updateResult = db
+    .prepare(
+      `UPDATE habit_counters
+       SET count = count + 1, updated_at = ?
+       WHERE id = ? AND habit_id = ?`
+    )
+    .run(timestamp, req.params.counterId, req.params.id);
+
+  if (updateResult.changes === 0) {
+    return res.status(404).json({ error: "Counter not found" });
+  }
+
+  const counter = db
+    .prepare("SELECT id, habit_id, name, count, created_at, updated_at FROM habit_counters WHERE id = ?")
+    .get(req.params.counterId);
+
+  res.json({ counter });
+});
+
+// Delete a tap counter
+router.delete("/:id/counters/:counterId", (req, res) => {
+  const result = db
+    .prepare("DELETE FROM habit_counters WHERE id = ? AND habit_id = ?")
+    .run(req.params.counterId, req.params.id);
+
+  if (result.changes === 0) {
+    return res.status(404).json({ error: "Counter not found" });
+  }
+
+  res.json({ success: true });
+});
+
 // Create habit
 router.post("/", (req, res) => {
   const { name, description, frequency, frequency_data, duration_type, duration_days, is_private, color, icon } = req.body;

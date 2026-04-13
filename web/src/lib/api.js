@@ -456,5 +456,37 @@ export const api = {
       if (!response.ok) throw new Error('Failed to fetch completions');
       return response.json();
     },
+
+    getCounters: async (id) => {
+      const response = await fetch(`${API_BASE}/habits/${id}/counters`);
+      if (!response.ok) throw new Error('Failed to fetch counters');
+      return response.json();
+    },
+
+    createCounter: async (id, name) => {
+      const response = await fetch(`${API_BASE}/habits/${id}/counters`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (!response.ok) throw new Error('Failed to create counter');
+      return response.json();
+    },
+
+    incrementCounter: async (id, counterId) => {
+      const response = await fetch(`${API_BASE}/habits/${id}/counters/${counterId}/increment`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to increment counter');
+      return response.json();
+    },
+
+    deleteCounter: async (id, counterId) => {
+      const response = await fetch(`${API_BASE}/habits/${id}/counters/${counterId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete counter');
+      return response.json();
+    },
   },
 };

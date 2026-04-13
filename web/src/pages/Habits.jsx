@@ -42,6 +42,10 @@ function parseFrequencyData(value) {
 function HabitCard({ habit, onToggle, onEdit, onDelete, isCompleted, isPrivate, onUnlock }) {
   const [showStats, setShowStats] = useState(false);
   const [stats, setStats] = useState(null);
+  const [showCounters, setShowCounters] = useState(false);
+  const [counters, setCounters] = useState([]);
+  const [counterName, setCounterName] = useState('');
+  const [activePulseId, setActivePulseId] = useState(null);
 
   const loadStats = async () => {
     if (!showStats) {
@@ -53,6 +57,66 @@ function HabitCard({ habit, onToggle, onEdit, onDelete, isCompleted, isPrivate, 
       }
     }
     setShowStats(!showStats);
+  };
+
+  const loadCounters = async () => {
+    try {
+      const data = await api.habits.getCounters(habit.id);
+      setCounters(Array.isArray(data?.counters) ? data.counters : []);
+    } catch (error) {
+      console.error('Failed to load counters:', error);
+    }
+  };
+
+  const toggleCounters = async () => {
+    if (!showCounters) {
+      await loadCounters();
+    }
+    setShowCounters(!showCounters);
+  };
+
+  const handleCreateCounter = async () => {
+    const name = counterName.trim();
+    if (!name) return;
+    try {
+      const data = await api.habits.createCounter(habit.id, name);
+      if (data?.counter) {
+        setCounters(prev => [data.counter, ...prev]);
+      }
+      setCounterName('');
+    } catch (error) {
+      console.error('Failed to create counter:', error);
+    }
+  };
+
+  const handleIncrementCounter = async (counterId) => {
+    setActivePulseId(counterId);
+    setTimeout(() => setActivePulseId(null), 220);
+    try {
+      const data = await api.habits.incrementCounter(habit.id, counterId);
+      if (data?.counter) {
+        setCounters(prev =>
+          prev.map(counter => (counter.id === counterId ? data.counter : counter))
+        );
+      } else {
+        setCounters(prev =>
+          prev.map(counter =>
+            counter.id === counterId ? { ...counter, count: Number(counter.count || 0) + 1 } : counter
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Failed to increment counter:', error);
+    }
+  };
+
+  const handleDeleteCounter = async (counterId) => {
+    try {
+      await api.habits.deleteCounter(habit.id, counterId);
+      setCounters(prev => prev.filter(counter => counter.id !== counterId));
+    } catch (error) {
+      console.error('Failed to delete counter:', error);
+    }
   };
 
   const getFrequencyText = () => {
@@ -129,6 +193,13 @@ function HabitCard({ habit, onToggle, onEdit, onDelete, isCompleted, isPrivate, 
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
+            onClick={toggleCounters}
+            className="p-2 rounded-lg text-gray-400 hover:text-cyan-300 hover:bg-[#21262d] transition-all"
+            title={showCounters ? 'Hide tap counters' : 'Show tap counters'}
+          >
+            <ChevronRight className={`w-4 h-4 transition-transform ${showCounters ? 'rotate-90' : ''}`} />
+          </button>
+          <button
             onClick={loadStats}
             className="p-2 rounded-lg text-gray-400 hover:text-cyan-400 hover:bg-[#21262d] transition-all"
             title={showStats ? 'Hide stats' : 'Show stats'}
@@ -166,6 +237,74 @@ function HabitCard({ habit, onToggle, onEdit, onDelete, isCompleted, isPrivate, 
             <div className="text-2xl font-bold text-green-400">{stats.totalCompletions}</div>
             <div className="text-xs text-gray-500 mt-1">Total</div>
           </div>
+        </div>
+      )}
+
+      {showCounters && (
+        <div className="mt-4 pt-4 border-t border-[#30363d] space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-semibold uppercase tracking-wider text-cyan-300/80">
+              Tap Counter
+            </div>
+            <div className="h-px flex-1 bg-gradient-to-r from-cyan-500/40 to-transparent" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              value={counterName}
+              onChange={(e) => setCounterName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleCreateCounter();
+                }
+              }}
+              placeholder="Create counter (e.g. Water, Pushups)"
+              className="flex-1 px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+            />
+            <button
+              onClick={handleCreateCounter}
+              disabled={!counterName.trim()}
+              className="px-3 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-cyan-500 to-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-cyan-600 hover:to-blue-700 transition-all"
+            >
+              Add
+            </button>
+          </div>
+
+          {counters.length === 0 ? (
+            <p className="text-xs text-gray-500">No counters yet. Add one and tap to increase.</p>
+          ) : (
+            <div className="space-y-2">
+              {counters.map((counter) => (
+                <div
+                  key={counter.id}
+                  className="flex items-center gap-2 p-2 rounded-xl bg-[#0d1117] border border-[#30363d]"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-200 truncate">{counter.name}</p>
+                    <p className="text-xs text-gray-500">Count: {counter.count}</p>
+                  </div>
+
+                  <button
+                    onClick={() => handleIncrementCounter(counter.id)}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 transition-all active:scale-95 ${
+                      activePulseId === counter.id ? 'scale-105 shadow-lg shadow-cyan-500/25' : ''
+                    }`}
+                  >
+                    +1 Tap
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteCounter(counter.id)}
+                    className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    title="Delete counter"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
